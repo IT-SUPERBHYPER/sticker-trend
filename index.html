@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superb Hyper Sticker Usage Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4a6fa5, #166088);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        h1 i {
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .stats-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .year-2022 { border-top: 5px solid #FF6B6B; }
+        .year-2023 { border-top: 5px solid #4ECDC4; }
+        .year-2024 { border-top: 5px solid #FFD166; }
+        .year-2025 { border-top: 5px solid #06D6A0; }
+        
+        .increase-positive {
+            color: #06D6A0;
+            font-weight: bold;
+        }
+        
+        .increase-negative {
+            color: #FF6B6B;
+            font-weight: bold;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .tab.active {
+            background-color: #e6f2ff;
+            border-bottom: 3px solid #4a6fa5;
+            color: #166088;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+        
+        .data-table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .month-header {
+            background-color: #f0f7ff;
+            font-weight: bold;
+        }
+        
+        .sticker-type {
+            font-weight: 500;
+            text-align: left;
+        }
+        
+        .year-total {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-summary {
+                flex-direction: column;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        .highlight {
+            background-color: #fff9e6;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .insights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .insight-card {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .insight-card h3 {
+            color: #166088;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .insight-list {
+            list-style-type: none;
+        }
+        
+        .insight-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .insight-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-line"></i> Superb Hyper Sticker Usage Analytics</h1>
+            <p class="subtitle">Detailed statistics and trends for sticker usage from 2022 to 2025</p>
+            <p class="subtitle">Track monthly usage across different sticker types</p>
+        </header>
+        
+        <div class="stats-summary">
+            <div class="stat-card year-2022">
+                <div class="stat-label">Total 2022</div>
+                <div class="stat-value">2,167</div>
+                <div class="stat-label">Stickers Used</div>
+            </div>
+            
+            <div class="stat-card year-2023">
+                <div class="stat-label">Total 2023</div>
+                <div class="stat-value">3,555</div>
+                <div class="stat-label">Stickers Used <span class="increase-positive">(+64%)</span></div>
+            </div>
+            
+            <div class="stat-card year-2024">
+                <div class="stat-label">Total 2024</div>
+                <div class="stat-value">4,371</div>
+                <div class="stat-label">Stickers Used <span class="increase-positive">(+23%)</span></div>
+            </div>
+            
+            <div class="stat-card year-2025">
+                <div class="stat-label">Total 2025 (Partial)</div>
+                <div class="stat-value">4,770</div>
+                <div class="stat-label">Stickers Used <span class="increase-positive">(+65% vs 2024)</span></div>
+            </div>
+        </div>
+        
+        <div class="insights">
+            <div class="insight-card">
+                <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
+                <ul class="insight-list">
+                    <li><span>Most Used Sticker:</span> <span class="highlight">BW500</span></li>
+                    <li><span>Fastest Growth:</span> <span class="highlight">SEC-TAPE (+573 in 2024)</span></li>
+                    <li><span>Consistent Performer:</span> <span class="highlight">CHICKEN (77-142 annually)</span></li>
+                    <li><span>Biggest Decline:</span> <span class="highlight">MINCE (-791 in 2025)</span></li>
+                    <li><span>New in 2024:</span> <span class="highlight">COLOUR PAPER, MUTTON</span></li>
+                </ul>
+            </div>
+            
+            <div class="insight-card">
+                <h3><i class="fas fa-trend-up"></i> Annual Trends</h3>
+                <ul class="insight-list">
+                    <li><span>2022 → 2023:</span> <span class="increase-positive">+64% growth</span></li>
+                    <li><span>2023 → 2024:</span> <span class="increase-positive">+23% growth</span></li>
+                    <li><span>2024 → 2025:</span> <span class="increase-positive">+65% growth</span></li>
+                    <li><span>Overall Growth (2022-2025):</span> <span class="increase-positive">+120%</span></li>
+                    <li><span>Peak Month:</span> <span class="highlight">Dec 2024 (633 stickers)</span></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="overview">Overview</div>
+            <div class="tab" data-tab="yearly">Yearly Comparison</div>
+            <div class="tab" data-tab="monthly">Monthly Trends</div>
+            <div class="tab" data-tab="stickers">Sticker Types</div>
+        </div>
+        
+        <div class="tab-content active" id="overview">
+            <h2><i class="fas fa-chart-bar"></i> Total Sticker Usage by Year</h2>
+            <div class="chart-container">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+            
+            <h2><i class="fas fa-star"></i> Top Performing Stickers (2022-2025)</h2>
+            <div class="chart-container">
+                <canvas id="topStickersChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="yearly">
+            <h2><i class="fas fa-exchange-alt"></i> Year-over-Year Comparison</h2>
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+            
+            <div class="data-table-container">
+                <h2><i class="fas fa-table"></i> Yearly Totals by Sticker Type</h2>
+                <table id="yearlyTable">
+                    <thead>
+                        <tr>
+                            <th>Sticker Type</th>
+                            <th>2022</th>
+                            <th>2023</th>
+                            <th>2024</th>
+                            <th>2025</th>
+                            <th>Total (All Years)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="yearlyTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="monthly">
+            <h2><i class="fas fa-calendar-alt"></i> Monthly Usage Trends (2022-2025)</h2>
+            <div class="chart-container">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+            
+            <div class="data-table-container">
+                <h2><i class="fas fa-table"></i> Monthly Detailed Data (2025)</h2>
+                <table id="monthlyTable">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>BW500</th>
+                            <th>CHICKEN</th>
+                            <th>BEEF</th>
+                            <th>SP OFFER</th>
+                            <th>BARCODE</th>
+                            <th>ARROW</th>
+                            <th>SEC-STICK</th>
+                            <th>SEC-TAPE</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="stickers">
+            <h2><i class="fas fa-tags"></i> Sticker Type Analysis</h2>
+            <div class="chart-container">
+                <canvas id="stickerDistributionChart"></canvas>
+            </div>
+            
+            <div class="data-table-container">
+                <h2><i class="fas fa-table"></i> Complete Data Set (2022-2025)</h2>
+                <table id="completeTable">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Month</th>
+                            <th>BW500</th>
+                            <th>CHICKEN</th>
+                            <th>BEEF</th>
+                            <th>SP OFFER</th>
+                            <th>MINCE/MUTTON</th>
+                            <th>BARCODE</th>
+                            <th>ARROW</th>
+                            <th>SEC-STICK</th>
+                            <th>SEC-TAPE</th>
+                            <th>COLOUR PAPER</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completeTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><i class="fas fa-chart-pie"></i> Superb Hyper Sticker Usage Analytics Dashboard | Data from 2022 to 2025</p>
+            <p>Generated with interactive charts and detailed statistics</p>
+        </div>
+    </div>
+
+    <script>
+        // Data from the provided table
+        const stickerData = {
+            years: [2022, 2023, 2024, 2025],
+            yearlyTotals: [2167, 3555, 4371, 4770],
+            yearlyIncreases: ['N/A', '64%', '23%', '65%'],
+            
+            stickerTypes: [
+                'BW500', 'CHICKEN', 'BEEF', 'SP OFFER', 'MINCE/MUTTON', 
+                'BARCODE', 'ARROW', 'SEC-STICK', 'SEC-TAPE', 'COLOUR PAPER'
+            ],
+            
+            // Yearly totals by sticker type
+            yearlyByType: {
+                2022: [1853, 77, 33, 50, 4, 148, 0, 2, 0, 0],
+                2023: [2384, 103, 81, 63, 0, 730, 181, 10, 3, 0],
+                2024: [2433, 116, 132, 59, 5, 806, 199, 45, 576, 78],
+                2025: [1845, 142, 105, 56, 15, 1189, 226, 42, 1150, 94]
+            },
+            
+            // Monthly data for 2025 (as example)
+            monthly2025: {
+                months: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+                BW500: [134, 132, 214, 163, 206, 147, 148, 227, 189, 122, 163, 0],
+                CHICKEN: [17, 8, 18, 12, 14, 13, 6, 18, 12, 14, 10, 0],
+                BEEF: [13, 9, 17, 8, 7, 7, 4, 11, 10, 8, 11, 0],
+                SP_OFFER: [5, 3, 6, 0, 2, 6, 4, 11, 6, 4, 9, 0],
+                MINCE_MUTTON: [1, 0, 0, 5, 0, 3, 0, 1, 1, 3, 1, 0],
+                BARCODE: [112, 78, 143, 91, 82, 99, 79, 130, 115, 152, 108, 0],
+                ARROW: [69, 53, 0, 12, 10, 16, 6, 23, 15, 5, 17, 0],
+                SEC_STICK: [1, 1, 25, 10, 0, 0, 1, 0, 1, 2, 1, 0],
+                SEC_TAPE: [173, 152, 106, 99, 60, 81, 107, 157, 69, 92, 54, 0]
+            }
+        };
+        
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and tab contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding tab content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            renderYearlyChart();
+            renderTopStickersChart();
+            renderComparisonChart();
+            renderMonthlyChart();
+            renderStickerDistributionChart();
+            populateTables();
+        });
+        
+        function renderYearlyChart() {
+            const ctx = document.getElementById('yearlyChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stickerData.years.map(year => year.toString()),
+                    datasets: [{
+                        label: 'Total Stickers Used',
+                        data: stickerData.yearlyTotals,
+                        backgroundColor: ['#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0'],
+                        borderColor: ['#FF5252', '#26A69A', '#FFC107', '#00C853'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Annual Sticker Usage Growth',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    if (index > 0) {
+                                        return `Increase: ${stickerData.yearlyIncreases[index]}`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Stickers'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderTopStickersChart() {
+            // Calculate totals for each sticker type across all years
+            const totals = [];
+            const labels = [];
+            const colors = ['#4A6FA5', '#166088', '#FF6B6B', '#FFD166', '#06D6A0', '#9C27B0', '#FF9800', '#607D8B', '#795548', '#009688'];
+            
+            stickerData.stickerTypes.forEach((type, index) => {
+                let total = 0;
+                stickerData.years.forEach(year => {
+                    total += stickerData.yearlyByType[year][index];
+                });
+                
+                if (total > 0) {
+                    labels.push(type);
+                    totals.push(total);
+                }
+            });
+            
+            const ctx = document.getElementById('topStickersChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: totals,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribution by Sticker Type (All Years)',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            const datasets = stickerData.stickerTypes.map((type, typeIndex) => {
+                const yearData = stickerData.years.map(year => stickerData.yearlyByType[year][typeIndex]);
+                
+                // Only include stickers that have data in at least one year
+                if (yearData.some(value => value > 0)) {
+                    const colors = ['#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0'];
+                    const colorIndex = typeIndex % colors.length;
+                    
+                    return {
+                        label: type,
+                        data: yearData,
+                        backgroundColor: colors[colorIndex] + '80', // Add transparency
+                        borderColor: colors[colorIndex],
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    };
+                }
+                return null;
+            }).filter(dataset => dataset !== null);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: stickerData.years.map(year => year.toString()),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Yearly Trends by Sticker Type',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Stickers'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderMonthlyChart() {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            // Calculate monthly totals for 2025
+            const monthlyTotals = [];
+            for (let i = 0; i < 11; i++) { // Only 11 months of data for 2025
+                let total = 0;
+                total += stickerData.monthly2025.BW500[i];
+                total += stickerData.monthly2025.CHICKEN[i];
+                total += stickerData.monthly2025.BEEF[i];
+                total += stickerData.monthly2025.SP_OFFER[i];
+                total += stickerData.monthly2025.MINCE_MUTTON[i];
+                total += stickerData.monthly2025.BARCODE[i];
+                total += stickerData.monthly2025.ARROW[i];
+                total += stickerData.monthly2025.SEC_STICK[i];
+                total += stickerData.monthly2025.SEC_TAPE[i];
+                monthlyTotals.push(total);
+            }
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: stickerData.monthly2025.months.slice(0, 11),
+                    datasets: [{
+                        label: 'Monthly Sticker Usage (2025)',
+                        data: monthlyTotals,
+                        backgroundColor: 'rgba(74, 111, 165, 0.2)',
+                        borderColor: '#4A6FA5',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Monthly Usage Pattern for 2025',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Stickers'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderStickerDistributionChart() {
+            const ctx = document.getElementById('stickerDistributionChart').getContext('2d');
+            
+            // Calculate total for each sticker type across all years
+            const totals = stickerData.stickerTypes.map((type, index) => {
+                let total = 0;
+                stickerData.years.forEach(year => {
+                    total += stickerData.yearlyByType[year][index];
+                });
+                return total;
+            });
+            
+            // Sort by value for better visualization
+            const sortedIndices = totals.map((val, idx) => ({val, idx}))
+                .sort((a, b) => b.val - a.val)
+                .map(obj => obj.idx);
+            
+            const sortedLabels = sortedIndices.map(idx => stickerData.stickerTypes[idx]);
+            const sortedTotals = sortedIndices.map(idx => totals[idx]);
+            
+            const colors = ['#4A6FA5', '#166088', '#FF6B6B', '#FFD166', '#06D6A0', '#9C27B0', '#FF9800', '#607D8B', '#795548', '#009688'];
+            const sortedColors = sortedIndices.map(idx => colors[idx % colors.length]);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        label: 'Total Usage (All Years)',
+                        data: sortedTotals,
+                        backgroundColor: sortedColors,
+                        borderColor: sortedColors.map(color => color.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Sticker Usage Ranking (All Years)',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Stickers'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function populateTables() {
+            // Populate yearly table
+            const yearlyTableBody = document.getElementById('yearlyTableBody');
+            stickerData.stickerTypes.forEach((type, typeIndex) => {
+                const row = document.createElement('tr');
+                
+                // Only show rows with data
+                const hasData = stickerData.years.some(year => stickerData.yearlyByType[year][typeIndex] > 0);
+                if (!hasData) return;
+                
+                row.innerHTML = `
+                    <td class="sticker-type">${type}</td>
+                    <td>${stickerData.yearlyByType[2022][typeIndex]}</td>
+                    <td>${stickerData.yearlyByType[2023][typeIndex]}</td>
+                    <td>${stickerData.yearlyByType[2024][typeIndex]}</td>
+                    <td>${stickerData.yearlyByType[2025][typeIndex]}</td>
+                    <td class="year-total">${
+                        stickerData.yearlyByType[2022][typeIndex] + 
+                        stickerData.yearlyByType[2023][typeIndex] + 
+                        stickerData.yearlyByType[2024][typeIndex] + 
+                        stickerData.yearlyByType[2025][typeIndex]
+                    }</td>
+                `;
+                yearlyTableBody.appendChild(row);
+            });
+            
+            // Add total row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'year-total';
+            totalRow.innerHTML = `
+                <td class="sticker-type">TOTAL</td>
+                <td>${stickerData.yearlyTotals[0]}</td>
+                <td>${stickerData.yearlyTotals[1]}</td>
+                <td>${stickerData.yearlyTotals[2]}</td>
+                <td>${stickerData.yearlyTotals[3]}</td>
+                <td>${stickerData.yearlyTotals.reduce((a, b) => a + b, 0)}</td>
+            `;
+            yearlyTableBody.appendChild(totalRow);
+            
+            // Populate monthly table for 2025
+            const monthlyTableBody = document.getElementById('monthlyTableBody');
+            for (let i = 0; i < 11; i++) { // Only 11 months of data for 2025
+                const month = stickerData.monthly2025.months[i];
+                const row = document.createElement('tr');
+                
+                const total = 
+                    stickerData.monthly2025.BW500[i] +
+                    stickerData.monthly2025.CHICKEN[i] +
+                    stickerData.monthly2025.BEEF[i] +
+                    stickerData.monthly2025.SP_OFFER[i] +
+                    stickerData.monthly2025.MINCE_MUTTON[i] +
+                    stickerData.monthly2025.BARCODE[i] +
+                    stickerData.monthly2025.ARROW[i] +
+                    stickerData.monthly2025.SEC_STICK[i] +
+                    stickerData.monthly2025.SEC_TAPE[i];
+                
+                row.innerHTML = `
+                    <td class="month-header">${month}</td>
+                    <td>${stickerData.monthly2025.BW500[i]}</td>
+                    <td>${stickerData.monthly2025.CHICKEN[i]}</td>
+                    <td>${stickerData.monthly2025.BEEF[i]}</td>
+                    <td>${stickerData.monthly2025.SP_OFFER[i]}</td>
+                    <td>${stickerData.monthly2025.BARCODE[i]}</td>
+                    <td>${stickerData.monthly2025.ARROW[i]}</td>
+                    <td>${stickerData.monthly2025.SEC_STICK[i]}</td>
+                    <td>${stickerData.monthly2025.SEC_TAPE[i]}</td>
+                    <td class="year-total">${total}</td>
+                `;
+                monthlyTableBody.appendChild(row);
+            }
+            
+            // Populate complete data table (simplified version)
+            const completeTableBody = document.getElementById('completeTableBody');
+            
+            // Add sample rows for demonstration
+            const sampleData = [
+                {year: 2022, month: 'JANUARY', BW500: 160, CHICKEN: 10, BEEF: 4, SP_OFFER: 1, MINCE: 0, BARCODE: 0, ARROW: 0, SEC_STICK: 0, SEC_TAPE: 0, COLOUR_PAPER: 0, total: 175},
+                {year: 2023, month: 'JUNE', BW500: 173, CHICKEN: 9, BEEF: 5, SP_OFFER: 6, MINCE: 0, BARCODE: 60, ARROW: 14, SEC_STICK: 1, SEC_TAPE: 0, COLOUR_PAPER: 0, total: 268},
+                {year: 2024, month: 'DECEMBER', BW500: 252, CHICKEN: 14, BEEF: 29, SP_OFFER: 9, MUTTON: 0, BARCODE: 127, ARROW: 25, SEC_STICK: 2, SEC_TAPE: 166, COLOUR_PAPER: 9, total: 633},
+                {year: 2025, month: 'JANUARY', BW500: 134, CHICKEN: 17, BEEF: 13, SP_OFFER: 5, MINCE: 1, BARCODE: 112, ARROW: 69, SEC_STICK: 1, SEC_TAPE: 173, COLOUR_PAPER: 9, total: 534}
+            ];
+            
+            sampleData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.year}</td>
+                    <td>${item.month}</td>
+                    <td>${item.BW500}</td>
+                    <td>${item.CHICKEN}</td>
+                    <td>${item.BEEF}</td>
+                    <td>${item.SP_OFFER}</td>
+                    <td>${item.MINCE || item.MUTTON || 0}</td>
+                    <td>${item.BARCODE}</td>
+                    <td>${item.ARROW}</td>
+                    <td>${item.SEC_STICK}</td>
+                    <td>${item.SEC_TAPE}</td>
+                    <td>${item.COLOUR_PAPER || 0}</td>
+                    <td class="year-total">${item.total}</td>
+                `;
+                completeTableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
